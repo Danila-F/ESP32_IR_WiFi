@@ -1,0 +1,27 @@
+{
+    "name": "ESP32 IR WiFi",
+    "build": {
+        "dockerfile": "Dockerfile"
+    },
+    "runArgs": [
+        "--privileged"
+    ],
+    "remoteUser": "vscode",
+    "containerEnv": {
+        "PLATFORMIO_CORE_DIR": "${containerWorkspaceFolder}/.pio-core"
+    },
+    "customizations": {
+        "vscode": {
+            "extensions": [
+                "platformio.platformio-ide"
+            ],
+            "settings": {
+                "platformio-ide.useBuiltinPIOCore": false,
+                "platformio-ide.customCoreDir": "${containerWorkspaceFolder}/.pio-core",
+                "platformio-ide.customPATH": "/home/vscode/.local/bin:/usr/local/bin:/usr/bin:/bin"
+            }
+        }
+    },
+    "postCreateCommand": "pip3 install --user --no-cache-dir platformio",
+    "postStartCommand": "if [ ! -f platformio_secrets.ini ] && [ -f platformio_secrets.example.ini ]; then cp platformio_secrets.example.ini platformio_secrets.ini; fi"
+}
