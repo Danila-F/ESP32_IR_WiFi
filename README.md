@@ -9,14 +9,49 @@
 - Исходный код проекта и `platformio.ini`.
 - `.devcontainer/` с воспроизводимым Linux-окружением.
 - `.vscode/extensions.json`, `.vscode/settings.json` и `.vscode/tasks.json` с переносимыми настройками VS Code.
-- `platformio_secrets.example.ini` как шаблон локальных секретов.
+- `.secrets/platformio.env.example` как шаблон локальных секретов.
 - Скрипты в `tools/` для подключения ESP32 и автопоиска serial-порта.
 
 ## Что не хранится в репозитории
 
 - `.pio/` и `.pio-core/` с артефактами сборки и локальным PlatformIO Core.
+- `.secrets/platformio.env` с локальными секретами.
 - `platformio_secrets.ini` с реальными секретами.
 - Автогенерируемые `.vscode/c_cpp_properties.json` и `.vscode/launch.json`, потому что они содержат абсолютные пути.
+
+## Как теперь устроены секреты
+
+В проекте используется двухуровневая схема:
+
+1. Для локальной работы в Dev Containers секреты хранятся в `.secrets/platformio.env`.
+2. Для GitHub Codespaces те же значения можно хранить как Codespaces secrets `WIFI_SSID` и `WIFI_PASSWORD`.
+
+Файл `platformio_secrets.ini` больше не предполагается редактировать вручную. Он генерируется автоматически из локального `.env`-файла или из переменных окружения Codespaces.
+
+### Почему это удобнее и безопаснее
+
+- Секреты не коммитятся в git.
+- В репозитории остаётся только шаблон `.secrets/platformio.env.example`.
+- Один и тот же механизм работает и локально, и в Codespaces.
+- Переезд на другой компьютер проще: достаточно заново заполнить локальный `.env` или использовать Codespaces secrets.
+- Генерируемый `platformio_secrets.ini` помечен как автосоздаваемый, поэтому меньше риск случайно править не тот файл.
+
+### Если у вас уже был старый `platformio_secrets.ini`
+
+Если у вас уже есть локальный `platformio_secrets.ini`, проект не будет затирать его пустым шаблоном, пока вы не настроите новый источник секретов.
+
+Чтобы перейти на новый способ:
+
+1. Перенесите значения в `.secrets/platformio.env`.
+2. Выполните задачу `Project: Sync WiFi Secrets`.
+3. После этого считайте `.secrets/platformio.env` основным местом хранения секретов.
+
+### Важное ограничение GitHub
+
+Если вы просто клонируете репозиторий на Windows и открываете его через локальный Dev Containers, обычные GitHub repository secrets или Actions secrets сами в контейнер не попадут.
+
+Для локального сценария используйте `.secrets/platformio.env`.
+Для GitHub-сценария подходят именно `Codespaces secrets`.
 
 ## Предварительные требования на Windows
 
@@ -90,20 +125,36 @@ code .
 
 - установит системные зависимости;
 - установит `PlatformIO`;
-- создаст `platformio_secrets.ini` из шаблона, если локального файла ещё нет.
+- при локальной работе создаст `.secrets/platformio.env` из шаблона, если файла ещё нет;
+- сгенерирует `platformio_secrets.ini` из локального `.env`-файла или из Codespaces secrets.
 
 ### 5. Заполнить локальные Wi-Fi секреты
 
-Откройте `platformio_secrets.ini` и укажите свои значения:
+Откройте `.secrets/platformio.env` и укажите свои значения:
 
-```ini
-[wifi_secrets]
-build_flags =
-    -D WIFI_SSID=\"YOUR_WIFI_NAME\"
-    -D WIFI_PASSWORD=\"YOUR_WIFI_PASSWORD\"
+```dotenv
+WIFI_SSID="YOUR_WIFI_NAME"
+WIFI_PASSWORD="YOUR_WIFI_PASSWORD"
 ```
 
 Этот файл не коммитится в git.
+
+После изменения значений выполните задачу `Project: Sync WiFi Secrets` или просто перезапустите контейнер.
+
+Сгенерированный `platformio_secrets.ini` появится автоматически.
+
+### 6. Если вы хотите хранить секреты через GitHub
+
+Это имеет смысл, если вы будете использовать GitHub Codespaces.
+
+Создайте в GitHub Codespaces secrets:
+
+- `WIFI_SSID`
+- `WIFI_PASSWORD`
+
+После создания или изменения секретов пересоздайте codespace или перезапустите контейнер, чтобы проект заново сгенерировал `platformio_secrets.ini`.
+
+Для локального Windows + Dev Containers этот способ не заменяет `.secrets/platformio.env`.
 
 ## Как правильно подключить ESP32 к компьютеру
 
@@ -171,16 +222,23 @@ usbipd list
 
 Откройте `Terminal -> Run Task` и используйте:
 
+- `Project: Sync WiFi Secrets`
 - `PIO: Build Firmware`
 - `PIO: Detect ESP32 Port`
 - `PIO: Upload Firmware (Auto Port)`
 - `PIO: Serial Monitor (Auto Port)`
+- `PIO: Full Flash Cycle`
 
 Задачи `Upload` и `Serial Monitor` автоматически ищут порт ESP32 внутри контейнера.
+Задача `Full Flash Cycle` последовательно синхронизирует секреты, собирает проект и прошивает плату.
 
 ## Команды внутри контейнера
 
 Если вам удобнее терминал, используйте:
+
+```bash
+bash ./tools/sync_platformio_secrets.sh
+```
 
 ```bash
 pio run
@@ -210,13 +268,30 @@ ESP32_PORT=/dev/ttyUSB0 ./tools/pio-upload-auto.sh
 2. Подключиться к WSL через `WSL: Connect to WSL`.
 3. Открыть папку проекта внутри WSL.
 4. Выполнить `Dev Containers: Reopen in Container`.
-5. Проверить или заполнить `platformio_secrets.ini`.
-6. Подключить ESP32 к USB data-кабелем.
-7. В PowerShell от администратора выполнить `.\tools\attach-esp32.ps1`.
-8. При необходимости перестроить контейнер.
-9. В контейнере выполнить задачу `PIO: Build Firmware`.
-10. Затем выполнить `PIO: Upload Firmware (Auto Port)`.
-11. После прошивки открыть `PIO: Serial Monitor (Auto Port)`.
+5. Проверить или заполнить `.secrets/platformio.env`.
+6. Выполнить `Project: Sync WiFi Secrets`.
+7. Подключить ESP32 к USB data-кабелем.
+8. В PowerShell от администратора выполнить `.\tools\attach-esp32.ps1`.
+9. При необходимости перестроить контейнер.
+10. В контейнере выполнить задачу `PIO: Build Firmware`.
+11. Затем выполнить `PIO: Upload Firmware (Auto Port)`.
+12. После прошивки открыть `PIO: Serial Monitor (Auto Port)`.
+
+## Какой способ хранения секретов выбрать
+
+### Если вы работаете локально на Windows
+
+Используйте `.secrets/platformio.env`.
+
+Это лучший баланс удобства и безопасности для локального `git clone -> VS Code -> Dev Container`.
+
+### Если вы работаете в GitHub Codespaces
+
+Используйте `Codespaces secrets` с именами `WIFI_SSID` и `WIFI_PASSWORD`.
+
+### Если у вас есть CI в GitHub Actions
+
+Для CI можно отдельно использовать `Actions secrets`, но они не подхватываются локальным Dev Container автоматически и в этом проекте для локальной разработки не используются.
 
 ## Если что-то не работает
 

@@ -3,6 +3,14 @@
     "build": {
         "dockerfile": "Dockerfile"
     },
+    "secrets": {
+        "WIFI_SSID": {
+            "description": "Wi-Fi SSID for the ESP32 firmware when using GitHub Codespaces"
+        },
+        "WIFI_PASSWORD": {
+            "description": "Wi-Fi password for the ESP32 firmware when using GitHub Codespaces"
+        }
+    },
     "runArgs": [
         "--privileged"
     ],
@@ -11,6 +19,12 @@
         "PLATFORMIO_CORE_DIR": "${containerWorkspaceFolder}/.pio-core"
     },
     "customizations": {
+        "codespaces": {
+            "openFiles": [
+                "README.md",
+                ".secrets/platformio.env.example"
+            ]
+        },
         "vscode": {
             "extensions": [
                 "platformio.platformio-ide"
@@ -23,5 +37,5 @@
         }
     },
     "postCreateCommand": "pip3 install --user --no-cache-dir platformio",
-    "postStartCommand": "if [ ! -f platformio_secrets.ini ] && [ -f platformio_secrets.example.ini ]; then cp platformio_secrets.example.ini platformio_secrets.ini; fi"
+    "postStartCommand": "bash .devcontainer/post-start.sh"
 }

@@ -1,5 +1,7 @@
 .pio/
 .pio-core/
 platformio_secrets.ini
+.secrets/*
+!.secrets/*.example
 .vscode/c_cpp_properties.json
 .vscode/launch.json
