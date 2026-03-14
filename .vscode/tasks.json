@@ -1,0 +1,49 @@
+{
+    "version": "2.0.0",
+    "tasks": [
+        {
+            "label": "PIO: Build Firmware",
+            "type": "process",
+            "command": "pio",
+            "args": [
+                "run",
+                "-d",
+                "${workspaceFolder}",
+                "-e",
+                "nodemcu-32s"
+            ],
+            "group": {
+                "kind": "build",
+                "isDefault": true
+            },
+            "problemMatcher": []
+        },
+        {
+            "label": "PIO: Detect ESP32 Port",
+            "type": "process",
+            "command": "bash",
+            "args": [
+                "${workspaceFolder}/tools/detect_esp32_port.sh"
+            ],
+            "problemMatcher": []
+        },
+        {
+            "label": "PIO: Upload Firmware (Auto Port)",
+            "type": "process",
+            "command": "bash",
+            "args": [
+                "${workspaceFolder}/tools/pio-upload-auto.sh"
+            ],
+            "problemMatcher": []
+        },
+        {
+            "label": "PIO: Serial Monitor (Auto Port)",
+            "type": "process",
+            "command": "bash",
+            "args": [
+                "${workspaceFolder}/tools/pio-monitor-auto.sh"
+            ],
+            "problemMatcher": []
+        }
+    ]
+}
