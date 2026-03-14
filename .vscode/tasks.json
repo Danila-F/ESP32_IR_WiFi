@@ -28,6 +28,15 @@
             "problemMatcher": []
         },
         {
+            "label": "Project: Sync WiFi Secrets",
+            "type": "process",
+            "command": "bash",
+            "args": [
+                "${workspaceFolder}/tools/sync_platformio_secrets.sh"
+            ],
+            "problemMatcher": []
+        },
+        {
             "label": "PIO: Upload Firmware (Auto Port)",
             "type": "process",
             "command": "bash",
@@ -42,6 +51,16 @@
             "command": "bash",
             "args": [
                 "${workspaceFolder}/tools/pio-monitor-auto.sh"
+            ],
+            "problemMatcher": []
+        },
+        {
+            "label": "PIO: Full Flash Cycle",
+            "dependsOrder": "sequence",
+            "dependsOn": [
+                "Project: Sync WiFi Secrets",
+                "PIO: Build Firmware",
+                "PIO: Upload Firmware (Auto Port)"
             ],
             "problemMatcher": []
         }
