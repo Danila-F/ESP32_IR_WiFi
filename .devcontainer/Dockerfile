@@ -9,6 +9,7 @@ RUN apt-get update \
         git \
         libusb-1.0-0 \
         ninja-build \
+        openssh-client \
         python3-pip \
         python3-venv \
         usbutils \

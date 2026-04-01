@@ -14,9 +14,13 @@
     "runArgs": [
         "--privileged"
     ],
+    "mounts": [
+        "source=${localEnv:SSH_AUTH_SOCK},target=/ssh-agent,type=bind"
+    ],
     "remoteUser": "vscode",
     "containerEnv": {
-        "PLATFORMIO_CORE_DIR": "${containerWorkspaceFolder}/.pio-core"
+        "PLATFORMIO_CORE_DIR": "${containerWorkspaceFolder}/.pio-core",
+        "SSH_AUTH_SOCK": "/ssh-agent"
     },
     "customizations": {
         "codespaces": {

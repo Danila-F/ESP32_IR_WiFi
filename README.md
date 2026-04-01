@@ -106,12 +106,18 @@
 Если репозиторий ещё не склонирован, сделайте это в терминале WSL:
 
 ```bash
+eval "$(ssh-agent -s)"
+ssh-add ~/.ssh/id_ed25519
+ssh -T git@github.com
+
 mkdir -p ~/projects
 cd ~/projects
-git clone <URL_ВАШЕГО_РЕПОЗИТОРИЯ> ESP32_IR_WiFi
+git clone <SSH_URL_ВАШЕГО_РЕПОЗИТОРИЯ> ESP32_IR_WiFi
 cd ESP32_IR_WiFi
 code .
 ```
+
+Если репозиторий уже был склонирован по `https://github.com/...`, dev container при старте автоматически переключит `origin` на SSH-вариант `git@github.com:owner/repo.git`.
 
 ### 4. Открыть проект в dev container
 
