@@ -15,11 +15,13 @@
         "--privileged"
     ],
     "mounts": [
-        "source=${localEnv:HOME}/.config/gh,target=/home/vscode/.config/gh,type=bind,readonly"
+        "source=${localEnv:HOME}/.config/gh,target=/home/vscode/.config/gh,type=bind,readonly",
+        "source=${localEnv:HOME}/.gitconfig,target=/tmp/host-gitconfig,type=bind,readonly"
     ],
     "remoteUser": "vscode",
     "containerEnv": {
         "GH_CONFIG_DIR": "/home/vscode/.config/gh",
+        "HOST_GITCONFIG": "/tmp/host-gitconfig",
         "PLATFORMIO_CORE_DIR": "${containerWorkspaceFolder}/.pio-core"
     },
     "customizations": {

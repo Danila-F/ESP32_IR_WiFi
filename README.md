@@ -120,8 +120,16 @@ code .
 Dev container использует хостовую авторизацию GitHub CLI без копирования токенов в репозиторий:
 
 - монтирует `${HOME}/.config/gh` из хоста в контейнер только для чтения;
+- монтирует `${HOME}/.gitconfig` и синхронизирует `user.name` / `user.email` в локальный git config репозитория;
 - автоматически включает `gh` как git credential helper внутри контейнера;
 - если `origin` был в SSH-виде `git@github.com:owner/repo.git`, переключает его обратно на `https://github.com/owner/repo.git`.
+
+Перед первым запуском dev container убедитесь, что на хосте настроена git identity:
+
+```bash
+git config --global user.name "Ваше Имя"
+git config --global user.email "ваш_email@example.com"
+```
 
 ### 4. Открыть проект в dev container
 

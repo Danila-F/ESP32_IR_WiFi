@@ -12,6 +12,27 @@ if git -C "${project_dir}" rev-parse --is-inside-work-tree >/dev/null 2>&1; then
     if [[ "${origin_url}" =~ ^git@github\.com:([^/]+)/([^/]+?)(\.git)?$ ]]; then
         git -C "${project_dir}" remote set-url origin "https://github.com/${BASH_REMATCH[1]}/${BASH_REMATCH[2]}.git"
     fi
+
+    host_gitconfig="${HOST_GITCONFIG:-/tmp/host-gitconfig}"
+    host_git_user_name=""
+    host_git_user_email=""
+
+    if [[ -f "${host_gitconfig}" ]]; then
+        host_git_user_name="$(git config -f "${host_gitconfig}" user.name || true)"
+        host_git_user_email="$(git config -f "${host_gitconfig}" user.email || true)"
+    fi
+
+    if [[ -n "${host_git_user_name}" ]]; then
+        git -C "${project_dir}" config --local user.name "${host_git_user_name}"
+    else
+        echo "Warning: user.name is not configured in the host ~/.gitconfig."
+    fi
+
+    if [[ -n "${host_git_user_email}" ]]; then
+        git -C "${project_dir}" config --local user.email "${host_git_user_email}"
+    else
+        echo "Warning: user.email is not configured in the host ~/.gitconfig."
+    fi
 fi
 
 if command -v gh >/dev/null 2>&1; then
