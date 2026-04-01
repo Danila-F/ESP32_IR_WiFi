@@ -6,10 +6,10 @@ RUN apt-get update \
     && apt-get install -y --no-install-recommends \
         ca-certificates \
         cmake \
+        gh \
         git \
         libusb-1.0-0 \
         ninja-build \
-        openssh-client \
         python3-pip \
         python3-venv \
         usbutils \

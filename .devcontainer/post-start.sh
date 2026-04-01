@@ -4,30 +4,27 @@ set -euo pipefail
 
 project_dir="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 
-mkdir -p "${HOME}/.ssh" "${project_dir}/.secrets"
-chmod 700 "${HOME}/.ssh"
-touch "${HOME}/.ssh/known_hosts"
-chmod 600 "${HOME}/.ssh/known_hosts"
-
-if ! ssh-keygen -F github.com -f "${HOME}/.ssh/known_hosts" >/dev/null 2>&1; then
-    github_host_keys="$(ssh-keyscan -T 5 -t rsa,ecdsa,ed25519 github.com 2>/dev/null || true)"
-
-    if [[ -n "${github_host_keys}" ]]; then
-        printf '%s\n' "${github_host_keys}" >> "${HOME}/.ssh/known_hosts"
-    fi
-fi
+mkdir -p "${project_dir}/.secrets"
 
 if git -C "${project_dir}" rev-parse --is-inside-work-tree >/dev/null 2>&1; then
     origin_url="$(git -C "${project_dir}" remote get-url origin 2>/dev/null || true)"
 
-    if [[ "${origin_url}" =~ ^https://github\.com/([^/]+)/([^/]+?)(\.git)?$ ]]; then
-        git -C "${project_dir}" remote set-url origin "git@github.com:${BASH_REMATCH[1]}/${BASH_REMATCH[2]}.git"
+    if [[ "${origin_url}" =~ ^git@github\.com:([^/]+)/([^/]+?)(\.git)?$ ]]; then
+        git -C "${project_dir}" remote set-url origin "https://github.com/${BASH_REMATCH[1]}/${BASH_REMATCH[2]}.git"
     fi
 fi
 
-if [[ -z "${SSH_AUTH_SOCK:-}" || ! -S "${SSH_AUTH_SOCK}" ]]; then
-    echo "Warning: SSH agent is not available inside the container."
-    echo "Rebuild the dev container after starting ssh-agent in WSL and loading your GitHub key with ssh-add."
+if command -v gh >/dev/null 2>&1; then
+    gh_config_dir="${GH_CONFIG_DIR:-${HOME}/.config/gh}"
+
+    if [[ -f "${gh_config_dir}/hosts.yml" ]]; then
+        gh auth setup-git >/dev/null 2>&1 || true
+    else
+        echo "Warning: GitHub CLI auth config is not mounted in the container."
+        echo "Run 'gh auth login' on the Linux host, then rebuild the dev container."
+    fi
+else
+    echo "Warning: GitHub CLI is not available inside the container."
 fi
 
 if [[ ! -f "${project_dir}/.secrets/platformio.env" ]] \

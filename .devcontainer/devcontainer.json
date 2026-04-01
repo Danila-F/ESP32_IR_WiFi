@@ -15,12 +15,12 @@
         "--privileged"
     ],
     "mounts": [
-        "source=${localEnv:SSH_AUTH_SOCK},target=/ssh-agent,type=bind"
+        "source=${localEnv:HOME}/.config/gh,target=/home/vscode/.config/gh,type=bind,readonly"
     ],
     "remoteUser": "vscode",
     "containerEnv": {
-        "PLATFORMIO_CORE_DIR": "${containerWorkspaceFolder}/.pio-core",
-        "SSH_AUTH_SOCK": "/ssh-agent"
+        "GH_CONFIG_DIR": "/home/vscode/.config/gh",
+        "PLATFORMIO_CORE_DIR": "${containerWorkspaceFolder}/.pio-core"
     },
     "customizations": {
         "codespaces": {

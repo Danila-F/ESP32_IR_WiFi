@@ -106,18 +106,22 @@
 Если репозиторий ещё не склонирован, сделайте это в терминале WSL:
 
 ```bash
-eval "$(ssh-agent -s)"
-ssh-add ~/.ssh/id_ed25519
-ssh -T git@github.com
+gh auth status || gh auth login
 
 mkdir -p ~/projects
 cd ~/projects
-git clone <SSH_URL_ВАШЕГО_РЕПОЗИТОРИЯ> ESP32_IR_WiFi
+git clone <HTTPS_URL_ВАШЕГО_РЕПОЗИТОРИЯ> ESP32_IR_WiFi
 cd ESP32_IR_WiFi
 code .
 ```
 
-Если репозиторий уже был склонирован по `https://github.com/...`, dev container при старте автоматически переключит `origin` на SSH-вариант `git@github.com:owner/repo.git`.
+Для обычного Linux-хоста шаги те же: выполните `gh auth login` или `gh auth status` в терминале хоста до первого `Reopen in Container`.
+
+Dev container использует хостовую авторизацию GitHub CLI без копирования токенов в репозиторий:
+
+- монтирует `${HOME}/.config/gh` из хоста в контейнер только для чтения;
+- автоматически включает `gh` как git credential helper внутри контейнера;
+- если `origin` был в SSH-виде `git@github.com:owner/repo.git`, переключает его обратно на `https://github.com/owner/repo.git`.
 
 ### 4. Открыть проект в dev container
 
