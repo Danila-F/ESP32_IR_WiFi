@@ -32,10 +32,9 @@
             "settings": {
                 "platformio-ide.useBuiltinPIOCore": false,
                 "platformio-ide.customCoreDir": "${containerWorkspaceFolder}/.pio-core",
-                "platformio-ide.customPATH": "/home/vscode/.local/bin:/usr/local/bin:/usr/bin:/bin"
+                "platformio-ide.customPATH": "/opt/platformio/bin:/usr/local/bin:/usr/bin:/bin"
             }
         }
     },
-    "postCreateCommand": "pip3 install --user --no-cache-dir platformio",
     "postStartCommand": "bash .devcontainer/post-start.sh"
 }

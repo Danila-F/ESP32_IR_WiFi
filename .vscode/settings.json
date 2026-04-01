@@ -1,5 +1,5 @@
 {
     "platformio-ide.useBuiltinPIOCore": false,
     "platformio-ide.customCoreDir": "${workspaceFolder}/.pio-core",
-    "platformio-ide.customPATH": "${env:HOME}/.local/bin:/usr/local/bin:/usr/bin:/bin"
+    "platformio-ide.customPATH": "/opt/platformio/bin:/usr/local/bin:/usr/bin:/bin"
 }

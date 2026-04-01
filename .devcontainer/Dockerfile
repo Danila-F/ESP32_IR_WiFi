@@ -14,3 +14,9 @@ RUN apt-get update \
         usbutils \
         udev \
     && rm -rf /var/lib/apt/lists/*
+
+RUN python3 -m venv /opt/platformio \
+    && /opt/platformio/bin/pip install --no-cache-dir --upgrade pip setuptools wheel \
+    && /opt/platformio/bin/pip install --no-cache-dir platformio \
+    && ln -sf /opt/platformio/bin/pio /usr/local/bin/pio \
+    && ln -sf /opt/platformio/bin/platformio /usr/local/bin/platformio
