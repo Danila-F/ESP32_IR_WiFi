@@ -17,6 +17,14 @@ fi
 if command -v gh >/dev/null 2>&1; then
     gh_config_dir="${GH_CONFIG_DIR:-${HOME}/.config/gh}"
 
+    if git -C "${project_dir}" rev-parse --is-inside-work-tree >/dev/null 2>&1; then
+        git -C "${project_dir}" config --local --unset-all credential.helper || true
+        git -C "${project_dir}" config --local credential.helper ""
+        git -C "${project_dir}" config --local --unset-all credential.https://github.com.helper || true
+        git -C "${project_dir}" config --local credential.https://github.com.helper ""
+        git -C "${project_dir}" config --local --add credential.https://github.com.helper "!/usr/bin/gh auth git-credential"
+    fi
+
     if [[ -f "${gh_config_dir}/hosts.yml" ]]; then
         gh auth setup-git >/dev/null 2>&1 || true
     else
